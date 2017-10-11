@@ -12,8 +12,8 @@ public class Filter implements Interceptor {
         String name = invocation.getControllerKey();
         if (name.contains("test")) {
             System.out.println("aaa");
-            Controller c = invocation.getController();
-            c.redirect("/login");
+//            Controller c = invocation.getController();
+//            c.redirect("/login");
             return;
         }
         invocation.invoke();

@@ -43,5 +43,11 @@ public class _JFinalGenerator {
         //gernerator.setRemovedTableNamePrefixes("t_");
         // 生成
         gernerator.generate();
+
+        /*
+        视图没有主键，generator生成后无法使用dao进行调用，启动后会报错，
+        第一种方法在_MappingKit文件中去掉所有视图的mapping,然后在config中手动加入所有视图mapping;
+        第二种方法在_MappingKit文件中将所有视图的mapping语句第二个参数primaryKey去掉
+        */
     }
 }

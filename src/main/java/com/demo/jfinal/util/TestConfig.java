@@ -2,12 +2,15 @@ package com.demo.jfinal.util;
 
 import com.demo.jfinal.controller.LoginController;
 import com.demo.jfinal.controller.TestController;
-import com.demo.jfinal.interceptor.Filter;
+import com.demo.jfinal.model.db.*;
 import com.demo.jfinal.shiro.ShiroInterceptor;
 import com.demo.jfinal.shiro.ShiroPlugin;
 import com.jfinal.config.*;
+import com.jfinal.kit.Prop;
+import com.jfinal.kit.PropKit;
+import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
+import com.jfinal.plugin.c3p0.C3p0Plugin;
 import com.jfinal.render.ViewType;
-
 
 public class TestConfig extends JFinalConfig {
     /**
@@ -59,20 +62,59 @@ public class TestConfig extends JFinalConfig {
     @Override
     public void configInterceptor(Interceptors interceptors) {
         interceptors.add(new ShiroInterceptor());//shiro拦截器
-        interceptors.add(new Filter());//配置拦截器
+//        interceptors.add(new Filter());//配置拦截器
     }
 
     /**
      * //用来配置JFinal的Plugin，C3P0数据库连接池插件，ActiveRecordPlugin数据库访问插件
      *
-     * @param plugins
+     * @param me
      */
     @Override
     public void configPlugin(Plugins me) {
+        //加载数据库配置文件
+        Prop p = PropKit.use("SystemConfig.txt");
+        //创建c3p0连接
+        C3p0Plugin c3p0Plugin = new C3p0Plugin(p.get("jdbcUrl"), p.get("user"), p.get("password"));
+
+        ActiveRecordPlugin arp = new ActiveRecordPlugin(c3p0Plugin);
+        arp.setShowSql(true);
+        arp.setDevMode(true);
+        // 方式一： 直接配置数据表映射
+//        arp.addMapping("GB_DRIVER", "ID", GbDriver.class);
+
+        // 方式二：配置数据表映射写到一个文件中
+        _MappingKit.mapping(arp);
+
+        //视图mapping
+//        arp.addMapping("CV_CURRENT_PROCESS", CvCurrentProcess.class);
+//        arp.addMapping("CV_DAILY_TOTAL_MILEAGE", CvDailyTotalMileage.class);
+//        arp.addMapping("CV_ENT_MILEAGE", CvEntMileage.class);
+//        arp.addMapping("CV_ENT_VEHICLE_COUNT", CvEntVehicleCount.class);
+//        arp.addMapping("CV_ENT_VEHICLE_SIM_COUNT", CvEntVehicleSimCount.class);
+//        arp.addMapping("CV_GREEN_VIEW", CvGreenView.class);
+//        arp.addMapping("CV_GREEN_VIEW_copy", CvGreenViewCopy.class);
+//        arp.addMapping("CV_MONTH_DRIVER_COUNT", CvMonthDriverCount.class);
+//        arp.addMapping("CV_MONTH_MILEAGE_COUNT", CvMonthMileageCount.class);
+//        arp.addMapping("CV_MONTH_SPEED_AVERAGE", CvMonthSpeedAverage.class);
+//        arp.addMapping("CV_MONTH_VEHICLE_COUNT", CvMonthVehicleCount.class);
+//        arp.addMapping("CV_MONTH_VEHICLE_TIMES_COUNT", CvMonthVehicleTimesCount.class);
+//        arp.addMapping("CV_ORDER_MONITOR", CvOrderMonitor.class);
+//        arp.addMapping("CV_REPORT_AREA_ENT_COUNT", CvReportAreaEntCount.class);
+//        arp.addMapping("CV_REPORT_OFFLINE_COUNT", CvReportOfflineCount.class);
+//        arp.addMapping("CV_REPORT_ROAD_COUNT", CvReportRoadCount.class);
+//        arp.addMapping("CV_REPORT_VEHICLE_ONLINE_COUNT", CvReportVehicleOnlineCount.class);
+//        arp.addMapping("CV_VEHICLE_INSURE", CvVehicleInsure.class);
+//        arp.addMapping("CV_VEHICLE_MONITOR", CvVehicleMonitor.class);
+//        arp.addMapping("CV_VEHICLE_PASS_LICENSE", CvVehiclePassLicense.class);
+//        arp.addMapping("CV_VEHICLE_TRACK", CvVehicleTrack.class);
+//        arp.addMapping("CV_VEHICLE_TREE", CvVehicleTree.class);
+        me.add(c3p0Plugin);
+        me.add(arp);
+
+
+        //shiro
         ShiroPlugin shiroPlugin = new ShiroPlugin(this.routes);
-//        shiroPlugin.setLoginUrl("/login.do");
-//        shiroPlugin.setSuccessUrl("/index.do");
-//        shiroPlugin.setUnauthorizedUrl("/login.do");
         me.add(shiroPlugin);
     }
 }
