@@ -3,11 +3,18 @@ package com.demo.jfinal.util;
 import com.demo.jfinal.controller.LoginController;
 import com.demo.jfinal.controller.TestController;
 import com.demo.jfinal.interceptor.Filter;
+import com.demo.jfinal.shiro.ShiroInterceptor;
+import com.demo.jfinal.shiro.ShiroPlugin;
 import com.jfinal.config.*;
 import com.jfinal.render.ViewType;
 
 
 public class TestConfig extends JFinalConfig {
+    /**
+     * 供Shiro插件使用。
+     */
+    private Routes routes;
+
     /**
      * //此方法用来配置JFinal的常量值
      *
@@ -25,12 +32,13 @@ public class TestConfig extends JFinalConfig {
     /**
      * //配置JFinal访问路由
      *
-     * @param routes
+     * @param me
      */
     @Override
-    public void configRoute(Routes routes) {
-        routes.add("/test", TestController.class, "/");//路由，指定调用哪个controller,若不添加第三个参数访问时会默认添加/test路径
-        routes.add("/", LoginController.class, "/");
+    public void configRoute(Routes me) {
+        this.routes = me;
+        me.add("/test", TestController.class, "/");//路由，指定调用哪个controller,若不添加第三个参数访问时会默认添加/test路径
+        me.add("/", LoginController.class, "/");
     }
 
     /**
@@ -50,6 +58,7 @@ public class TestConfig extends JFinalConfig {
      */
     @Override
     public void configInterceptor(Interceptors interceptors) {
+        interceptors.add(new ShiroInterceptor());//shiro拦截器
         interceptors.add(new Filter());//配置拦截器
     }
 
@@ -59,7 +68,11 @@ public class TestConfig extends JFinalConfig {
      * @param plugins
      */
     @Override
-    public void configPlugin(Plugins plugins) {
-
+    public void configPlugin(Plugins me) {
+        ShiroPlugin shiroPlugin = new ShiroPlugin(this.routes);
+//        shiroPlugin.setLoginUrl("/login.do");
+//        shiroPlugin.setSuccessUrl("/index.do");
+//        shiroPlugin.setUnauthorizedUrl("/login.do");
+        me.add(shiroPlugin);
     }
 }
